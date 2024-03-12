@@ -2,9 +2,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.awt.image.WritableRenderedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
@@ -19,7 +17,6 @@ public class ShitPostBot {
     private static File filesourcesize;
     private static File filetemplate;
     private static File filesource;
-    private static File fileoverlay;
     private static File coordinates;
     private static Picture sourcesize;
     private static Picture template;
@@ -64,7 +61,6 @@ public class ShitPostBot {
         resultgraphics.drawImage(template, 0, 0, null);
         resultgraphics.drawImage(source, sourcex, sourcey, null);
         if(coordslist[2] > 0) {
-            fileoverlay = new File(("/Templates/Template" + filetemplatenum + "/Overlay.jpg"));
             overlay = new Picture("Overlay.png");
         } else {
             overlay = null;
@@ -76,12 +72,13 @@ public class ShitPostBot {
     }
 
     public static void readfile() throws Exception{
-        Scanner sc = new Scanner(coordinates);
-        for (int i = 0; sc.hasNextLine(); i++) {
-            coordslist[i] = ((int) Math.round(Double.parseDouble(sc.nextLine())));
-            int temp = coordslist[i];
-            overcoordslist[i] = temp;
-            // https://www.journaldev.com/18392/java-convert-string-to-double
+        try (Scanner sc = new Scanner(coordinates)) {
+            for (int i = 0; sc.hasNextLine(); i++) {
+                coordslist[i] = ((int) Math.round(Double.parseDouble(sc.nextLine())));
+                int temp = coordslist[i];
+                overcoordslist[i] = temp;
+                // https://www.journaldev.com/18392/java-convert-string-to-double
+            }
         }
     }
 
@@ -119,28 +116,29 @@ public class ShitPostBot {
     public static void saveOutput() throws IOException {
         RenderedImage temp = (RenderedImage) shitpost.getImage();
         File output = new File("OutputImages" + File.separator + "" + outputfilenum + ".jpg");
-        boolean out = output.createNewFile();
-        boolean jpg = ImageIO.write(temp, "png", output);
+        output.createNewFile();
+        ImageIO.write(temp, "png", output);
         outputfilenum++;
     }
 
     public static void main(String[] args) throws Exception{
         System.out.println("Welcome to ShitPostBot! The only place to get absolutely original memes! Any images you like make sure to take a snippit of them or you might never see them again! >:)");
-        Scanner scanner = new Scanner(System.in);
-        Boolean running = true;
-        while(running) {
-            System.out.println("Please press (r) for new image or (q) to quit the program.");
-            String reply = scanner.nextLine();
-            if (reply.equals("r")) {
-                randomShit();
-                resizeSource();
-                readfile();
-                //centerpic();
-                makeShitPost();
-            } else if (reply.equals("q")) {
-                running = false;
-            } else {
-                System.out.println("Try Again.");
+        try (Scanner scanner = new Scanner(System.in)) {
+            Boolean running = true;
+            while(running) {
+                System.out.println("Please press (r) for new image or (q) to quit the program.");
+                String reply = scanner.nextLine();
+                if (reply.equals("r")) {
+                    randomShit();
+                    resizeSource();
+                    readfile();
+                    //centerpic();
+                    makeShitPost();
+                } else if (reply.equals("q")) {
+                    running = false;
+                } else {
+                    System.out.println("Try Again.");
+                }
             }
         }
     }
